@@ -9,7 +9,7 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Kết nối thất bại: " . $conn->connect_error);
 }
-// Nhận yêu cầu cập nhật số lượng sách trong giỏ hàng
+// thêm vào giỏ hàng
 if (isset($_GET['action']) && $_GET['action'] == 'add' && isset($_POST['masach']) && isset($_POST['quantity'])) {
     $masach = $_POST['masach'];
     $quantity = $_POST['quantity'];
@@ -26,11 +26,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'add' && isset($_POST['masach']
         exit();
     }
 
-    // Kiểm tra nếu sách đã có trong giỏ hàng
     if (isset($_SESSION['cart'][$masach])) {
         $_SESSION['cart'][$masach]['soluong'] += $quantity;
     } else {
-        // Trường hợp sách chưa có trong giỏ hàng, thêm mới
         $_SESSION['cart'][$masach] = [
             'tensach' => $book['tensach'],
             'giasach' => $book['giasach'],
@@ -40,7 +38,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'add' && isset($_POST['masach']
     }
 }
 
-// Cập nhật số lượng sách trong giỏ hàng
+//update sl sách trong giỏ hàng
 if (isset($_GET['action']) && $_GET['action'] == 'update' && isset($_POST['masach']) && isset($_POST['quantity'])) {
     $masach = $_POST['masach'];
     $quantity = $_POST['quantity'];
@@ -72,9 +70,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'remove' && isset($_GET['masach
             unset($_SESSION['cart'][$masach]); 
         } 
 }
-// Kiểm tra giỏ hàng sau khi cập nhật
+
 $cartItems = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
-// Tính tổng số tiền của đơn hàng
+// tính tổng số tiền của đơn hàng
 $totalAmount = 0;
 foreach ($cartItems as $item) {
     $totalAmount += $item['giasach'] * $item['soluong'];

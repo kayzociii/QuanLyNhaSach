@@ -5,17 +5,14 @@ $username = "root";
 $password = "";
 $dbname = "quanlynhasach";
 
-// Kết nối đến cơ sở dữ liệu
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Kết nối thất bại: " . $conn->connect_error);
 }
 
-// Kiểm tra nếu có mã đơn hàng (mahoadon) trong URL
 if (isset($_GET['mahoadon'])) {
     $mahoadon = $_GET['mahoadon'];
 
-    // Lấy thông tin chi tiết đơn hàng từ bảng chitiethoadon
     $sql = "SELECT c.*, s.tensach, s.giasach, s.anhbia FROM chitiethoadon c
             JOIN sach s ON c.masach = s.masach
             WHERE c.mahoadon = ?";
@@ -25,7 +22,6 @@ if (isset($_GET['mahoadon'])) {
     $result = $stmt->get_result();
     
     if ($result->num_rows > 0) {
-        // Hiển thị chi tiết đơn hàng
         $orderDetails = [];
         while ($row = $result->fetch_assoc()) {
             $orderDetails[] = $row;

@@ -107,7 +107,6 @@ if ($result->num_rows > 0) {
     exit();
 }
 
-// Xử lý cập nhật thông tin tài khoản (không thay đổi tên tài khoản)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hoten = $_POST['hoten'];
     $email = $_POST['email'];
@@ -115,7 +114,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sodienthoai = $_POST['sodienthoai'];
     $ngaysinh = $_POST['ngaysinh'];
 
-    // Cập nhật thông tin trong bảng khachhang (không sửa tên tài khoản)
     $sql_update_khachhang = "UPDATE khachhang SET hoten = ?, email = ?, diachi = ?, sodienthoai = ?, ngaysinh = ? WHERE makhachhang = ?";
     $stmt_update_khachhang = $conn->prepare($sql_update_khachhang);
     $stmt_update_khachhang->bind_param("sssssi", $hoten, $email, $diachi, $sodienthoai, $ngaysinh, $row['makhachhang']);

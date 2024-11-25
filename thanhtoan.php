@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Kết nối tới cơ sở dữ liệu
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -11,10 +10,8 @@ if ($conn->connect_error) {
     die("Kết nối thất bại: " . $conn->connect_error);
 }
 
-// Lấy `mauser` từ session
 $mauser = $_SESSION['user']; 
 
-// Truy vấn lấy `makhachhang` từ bảng `user`
 $sql = "SELECT makhachhang FROM user WHERE mauser = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $mauser);
@@ -29,14 +26,13 @@ if ($result->num_rows > 0) {
     exit();
 }
 
-// Kiểm tra giỏ hàng có trống hay không
 if (!isset($_SESSION['cart']) || count($_SESSION['cart']) == 0) {
     echo "<p>Giỏ hàng trống. Không thể thanh toán.</p>";
     echo "<a href='homepage.php'>Trở về trang chủ</a>";
     exit();
 }
 
-// Xử lý thanh toán
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $hoten = $_POST['hoten'];
     $diachi = $_POST['diachi'];
@@ -45,34 +41,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $ngaydathang = date('Y-m-d H:i:s');
     $tongtien = $_POST['tongtien'];
 
-    // Thêm dữ liệu vào bảng `hoadon`
     $sql = "INSERT INTO hoadon (hoten, diachi, sodienthoai, ngaydathang, tongtien, makhachhang, maphuongthuc) 
             VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ssssdis", $hoten, $diachi, $sodienthoai, $ngaydathang, $tongtien, $makhachhang, $maphuongthuc);
     $stmt->execute();
 
-    // Lấy mã hóa đơn vừa tạo
     $mahoadon = $conn->insert_id;
 
-    // Lưu chi tiết hóa đơn vào bảng `chitiethoadon`
     foreach ($_SESSION['cart'] as $masach => $item) {
         $soluong = $item['soluong'];
         $dongia = $item['giasach'];
 
-        //Thêm chi tiết hóa đơn
         $sql = "INSERT INTO chitiethoadon (mahoadon, masach, soluong, dongia) VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iiid", $mahoadon, $masach, $soluong, $dongia);
         $stmt->execute();
 
-        // Trừ số lượng tồn trong bảng sach
         $sql = "UPDATE sach SET soluongton = soluongton - ?, ngaycapnhat = NOW() WHERE masach = ? AND soluongton >= ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iii", $soluong, $masach, $soluong);
         $stmt->execute();
 
-        // Kiểm tra nếu số lượng tồn không đủ
         if ($stmt->affected_rows == 0) {
             echo "<p>Số lượng tồn kho không đủ cho sách mã: $masach</p>";
             echo "<a href='cart.php'>Quay lại giỏ hàng</a>";
@@ -80,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // Xóa giỏ hàng sau khi thanh toán
     unset($_SESSION['cart']);
 
     echo "<script>
@@ -90,7 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit();
 }
 
-// Lấy danh sách phương thức thanh toán
 $sql = "SELECT * FROM phuongthucthanhtoan";
 $result = $conn->query($sql);
 $paymentMethods = [];
@@ -219,17 +207,14 @@ if ($result->num_rows > 0) {
 <?php include 'footer.php' ?>
 <script>
     function showQRCode() {
-    // Lấy giá trị được chọn từ dropdown
     const paymentMethod = document.getElementById("maphuongthuc").value;
 
-    // Lấy vùng chứa mã QR
     const qrCodeContainer = document.getElementById("qrCodeContainer");
 
-    // Nếu phương thức là Momo (maphuongthuc = 2), hiển thị mã QR
     if (paymentMethod == "2") {
-        qrCodeContainer.style.display = "block"; // Hiển thị vùng chứa
+        qrCodeContainer.style.display = "block"; 
     } else {
-        qrCodeContainer.style.display = "none"; // Ẩn vùng chứa
+        qrCodeContainer.style.display = "none"; 
     }
 }
 </script>

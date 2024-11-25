@@ -10,13 +10,12 @@ if ($conn->connect_error) {
     die("Kết nối thất bại: " . $conn->connect_error);
 }
 
-// Truy vấn thông tin đơn hàng của khách hàng
-$mauser = $_SESSION['user']; // Lấy mã khách hàng từ session
+
+$mauser = $_SESSION['user']; 
 $sql = "SELECT hoadon.mahoadon, hoadon.hoten, hoadon.ngaydathang, hoadon.tongtien 
         FROM hoadon
         JOIN khachhang ON hoadon.makhachhang = khachhang.makhachhang
-        WHERE hoadon.makhachhang = ?"; // Lọc theo mã khách hàng
-
+        WHERE hoadon.makhachhang = ?"; 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $mauser);
 $stmt->execute();
@@ -30,7 +29,6 @@ $result = $stmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đơn Hàng</title>
     <style>
-        /* Tạo giao diện cho bảng đơn hàng */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html { font-family: Arial, sans-serif; background-color: #f9f9f9; }
         .container { width: 80%; margin: 20px auto; }
