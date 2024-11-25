@@ -53,6 +53,11 @@ $_SESSION['last_activity'] = time();
         .nav .dropdown {
             position: relative;
         }
+        .nav .user-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;  
+        }
         .nav .dropdown .dropbtn {
             font-size: 16px;
             border: none;
@@ -74,6 +79,10 @@ $_SESSION['last_activity'] = time();
         }
         .nav .dropdown:hover .dropdown-content {
             display: block;
+        }
+        .dropdown i{
+            margin-right: 3px;
+            margin-left: 3px;
         }
         .dropdown-content a {
             color: white;
@@ -279,34 +288,33 @@ if ($conn->connect_error) {
     die("Kết nối thất bại: " . $conn->connect_error);
 }
 
-// Lấy dữ liệu từ bảng 'chude'
+
 $sql_chude = "SELECT machude, tenchude FROM chude";
 $result_chude = $conn->query($sql_chude);
 
-// Số sách hiển thị mỗi trang
+// giới hạn sách hiển thị mỗi trang
 $books_per_page = 12;
 
-// Lấy số trang từ GET
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$page = max($page, 1);  // Đảm bảo trang >= 1
 
-// Tính toán offset
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1); 
+
+
 $offset = ($page - 1) * $books_per_page;
 
-// Tính tổng số sách
+// tính tổng số sách
 $total_books_sql = "SELECT COUNT(*) AS total FROM sach";
 $total_books_result = $conn->query($total_books_sql);
 $total_books_row = $total_books_result->fetch_assoc();
 $total_books = $total_books_row['total'];
 
-// Tính tổng số trang
+// tính tổng số trang
 $total_pages = ceil($total_books / $books_per_page);
 
-// Lọc theo chủ đề nếu có
+// lọc sách theo chủ đề
 $machude = isset($_GET['machude']) ? $_GET['machude'] : null;
 $search_term = isset($_GET['search']) ? $_GET['search'] : '';
 
-// Câu truy vấn SQL với tìm kiếm
 $sql_sach = "SELECT sach.masach, sach.tensach, sach.giasach, sach.anhbia, chude.tenchude 
              FROM sach 
              JOIN chude ON sach.machude = chude.machude";
@@ -319,7 +327,6 @@ if ($search_term) {
 }
 $sql_sach .= " LIMIT ? OFFSET ?";
 
-// Chuẩn bị và thực thi câu lệnh SQL
 $stmt = $conn->prepare($sql_sach);
 
 if ($machude && $search_term) {
@@ -337,6 +344,7 @@ if ($machude && $search_term) {
 $stmt->execute();
 $result_sach = $stmt->get_result();
 
+
 function getCartItemCount() {
     if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
         $totalQuantity = 0;
@@ -347,6 +355,8 @@ function getCartItemCount() {
     }
     return 0;
 }
+// ẩn mấy cái carousel khi user thực hiện việc tìm kiếm
+$is_hidden = isset($_GET['search']) || isset($_GET['machude']);
 ?>
 
 <body>
@@ -356,6 +366,7 @@ function getCartItemCount() {
         <div class="dropdown">
             <button class="dropbtn"><i class="fas fa-bars"></i> Danh Mục <i class="fas fa-caret-down"></i></button>
             <div class="dropdown-content">
+                <!-- lọc theo chủ đề -->
                 <?php
                 if ($result_chude->num_rows > 0) {
                     while ($row = $result_chude->fetch_assoc()) {
@@ -374,20 +385,25 @@ function getCartItemCount() {
             </form> 
         </div>
         <div class="user-options">
+                <!-- kiểm tra đăng nhập -->
             <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
-                <span>Xin chào, <?= $_SESSION['hoten'] ?></span> | <a href="?action=logout">Đăng xuất</a>
+            <div class="dropdown">
+                <span class="dropbtn">Xin chào, <?= htmlspecialchars($_SESSION['hoten']) ?> <i class="fas fa-caret-down"></i></span>
+                <div class="dropdown-content">
+                <a href="thongtinkhachhang.php">Tài khoản của tôi</a>
+                <a href="donhang.php">Đơn hàng của tôi</a>
+                <a href="?action=logout">Đăng xuất</a> 
+                </div>
+            </div>
             <?php else: ?>
-                <a href="dangnhap.php"><i class="fas fa-user"></i> Đăng Nhập</a>
+            <a href="dangnhap.php"><i class="fas fa-user"></i> Đăng Nhập</a>
             <?php endif; ?>
-            <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
-                <a href="giohang.php"><i class="fas fa-shopping-cart"></i> Giỏ Hàng(<?php echo getCartItemCount(); ?>)</a>
-            <?php else: ?>
-                <a href="dangnhap.php" onclick="alert('Bạn cần đăng nhập để mua sách!');"><i class="fas fa-shopping-cart"></i> Giỏ Hàng</a>
-            <?php endif; ?>
+            <a href="giohang.php"><i class="fas fa-shopping-cart"></i> Giỏ Hàng (<?= getCartItemCount(); ?>)</a>
         </div>
     </div>
 
-    <!-- Carousel Banner -->
+    <!-- carousel, banner,.. -->
+    <?php if (!$is_hidden): ?>
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
         <div class="carousel-indicators">
             <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -445,7 +461,8 @@ function getCartItemCount() {
             </div>
         </div>
     </div>
-
+    <?php endif; ?>
+    <!-- tìm sách theo chủ đề -->
     <div class="details">
         <div class="categories">
             <div class="image-gallery">
@@ -472,6 +489,7 @@ function getCartItemCount() {
             </div>
         </div>
     </div>
+    <!-- phân trang -->
     <div class="pagination">
     <?php if ($page > 1): ?>
         <a href="?page=<?= $page - 1 ?>&search=<?= htmlspecialchars($search_term) ?>&machude=<?= $machude ?>">&#171; Trang trước</a>

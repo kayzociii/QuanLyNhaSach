@@ -88,7 +88,7 @@ $_SESSION['totalAmount'] = $totalAmount;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết giỏ hàng</title>
+    <title>Giỏ hàng</title>
     <style>
             * {
                 margin: 0;
@@ -200,6 +200,22 @@ $_SESSION['totalAmount'] = $totalAmount;
                 height: 100vh; 
                 text-align: center; 
             }
+            input[type="number"] {
+                display: inline-block;
+                width: 60px; 
+                text-align: center; 
+                vertical-align: middle; 
+            }
+
+            button {
+                display: inline-block;
+                vertical-align: middle; 
+            }   
+
+            .form-control-sm {
+                display: inline-block;
+                vertical-align: middle;
+            }
     </style>
 </head>
 <body>
@@ -207,7 +223,7 @@ $_SESSION['totalAmount'] = $totalAmount;
 
 <div class="container">
     <?php if (count($cartItems) > 0): ?>
-    <h2>Chi tiết giỏ hàng</h2>
+    <h2>Giỏ hàng</h2>
         <table>
             <thead>
                 <tr>
@@ -245,7 +261,11 @@ $_SESSION['totalAmount'] = $totalAmount;
                     <td colspan="5" style="text-align: center;">
                         <div class="cart-buttons">
                             <a href="homepage.php" class="checkout-button">Tiếp tục mua hàng</a>
-                            <a href="thanhtoan.php" class="checkout-button">Thanh toán</a>
+                            <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
+                                <a href="thanhtoan.php" class="checkout-button">Thanh toán</a>
+                            <?php else: ?>
+                                <a href="dangnhap.php" class="checkout-button" onclick="alert('Bạn cần đăng nhập để thanh toán!');">Thanh toán</a>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>

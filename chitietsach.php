@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi Tiết Sách</title>
+    <title>Thông tin sách</title>
     <!-- Thêm Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p class="book-price"><?= number_format($book['giasach'], 0, ',', '.') ?>đ</p>
                 <p class="book-description"><?= $book['mota'] ?></p>
 
-                <!-- Form tăng giảm số lượng -->
+                <!-- Tăng giảm số lượng sach-->
                 
             <form method="POST" action="giohang.php?action=add">
             <div class="d-flex align-items-center">
@@ -167,6 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'footer.php'; ?>
 
     <script>
+        //ko cho thêm sách quá sl kho 
         let maxQuantity = <?= $book['soluongton'] ?>;
         let quantityField = document.getElementById('quantity');
 
