@@ -85,14 +85,12 @@ if ($conn->connect_error) {
     die("Kết nối thất bại: " . $conn->connect_error);
 }
 
-// Kiểm tra nếu người dùng đã đăng nhập
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: dangnhap.php");
     exit();
 }
 
-// Lấy thông tin người dùng hiện tại
-$user_id = $_SESSION['user']; // ID của người dùng đã đăng nhập
+$user_id = $_SESSION['user']; 
 
 $sql = "SELECT * FROM user u INNER JOIN khachhang k ON u.makhachhang = k.makhachhang WHERE u.mauser = ?";
 $stmt = $conn->prepare($sql);
@@ -108,24 +106,55 @@ if ($result->num_rows > 0) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $hoten = $_POST['hoten'];
-    $email = $_POST['email'];
-    $diachi = $_POST['diachi'];
-    $sodienthoai = $_POST['sodienthoai'];
-    $ngaysinh = $_POST['ngaysinh'];
+    $alert_shown = false;
+    if (!empty($_POST['new_password']) && !empty($_POST['confirm_password'])) {
+        $new_password = $_POST['new_password'];
+        $confirm_password = $_POST['confirm_password'];
+        $current_password = $row['password'];
 
-    $sql_update_khachhang = "UPDATE khachhang SET hoten = ?, email = ?, diachi = ?, sodienthoai = ?, ngaysinh = ? WHERE makhachhang = ?";
-    $stmt_update_khachhang = $conn->prepare($sql_update_khachhang);
-    $stmt_update_khachhang->bind_param("sssssi", $hoten, $email, $diachi, $sodienthoai, $ngaysinh, $row['makhachhang']);
-    $stmt_update_khachhang->execute();
+        if ($new_password === $current_password) {
+            echo "<script>alert('Mật khẩu mới không được trùng với mật khẩu hiện tại!');</script>";
+            $alert_shown = true;
+        } 
+        else if ($new_password === $confirm_password) {
+            $sql_update_password = "UPDATE user SET password = ? WHERE makhachhang = ?";
+            $stmt_update_password = $conn->prepare($sql_update_password);
+            $stmt_update_password->bind_param("si", $new_password, $row['makhachhang']);
+            $stmt_update_password->execute();
+            $stmt_update_password->close();
 
-    echo "<script>
-    alert('Cập nhật thông tin thành công!');
-    window.location.href = 'thongtinkhachhang.php';
-    </script>";
+            session_destroy();
+            echo "<script>
+            alert('Cập nhật mật khẩu thành công! Vui lòng đăng nhập lại.');
+            window.location.href = 'dangnhap.php';
+            </script>";
+            $alert_shown = true;
+        } else {
+            echo "<script>alert('Mật khẩu xác nhận không khớp!');</script>";
+            $alert_shown = true;
+        }
+    }
 
-    exit();
+     if (!$alert_shown) { 
+        $hoten = $_POST['hoten'];
+        $email = $_POST['email'];
+        $diachi = $_POST['diachi'];
+        $sodienthoai = $_POST['sodienthoai'];
+        $ngaysinh = $_POST['ngaysinh'];
+
+        $sql_update_khachhang = "UPDATE khachhang SET hoten = ?, email = ?, diachi = ?, sodienthoai = ?, ngaysinh = ? WHERE makhachhang = ?";
+        $stmt_update_khachhang = $conn->prepare($sql_update_khachhang);
+        $stmt_update_khachhang->bind_param("sssssi", $hoten, $email, $diachi, $sodienthoai, $ngaysinh, $row['makhachhang']);
+        $stmt_update_khachhang->execute();
+
+        echo "<script>
+        alert('Cập nhật thông tin thành công!');
+        window.location.href = 'thongtinkhachhang.php';
+        </script>";
+        exit();
+    }
 }
+
 
 $stmt->close();
 $conn->close();
@@ -158,8 +187,16 @@ $conn->close();
                 <input type="date" name="ngaysinh" value="<?= htmlspecialchars($row['ngaysinh']) ?>" required>
             </div>
             <div class="form-group">
-                <input type="submit" value="Cập nhật thông tin">
+                <label for="new_password">Mật khẩu mới</label>
+                <input type="password" name="new_password" id="new_password">
             </div>
+            <div class="form-group">
+                <label for="confirm_password">Xác nhận mật khẩu</label>
+                <input type="password" name="confirm_password" id="confirm_password">
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Cập nhật thông tin">
+            </div>     
         </form>
     </div>
 

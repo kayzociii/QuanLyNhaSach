@@ -36,7 +36,9 @@
             margin-bottom: 10px;
         }
 
-        .book-genre {
+        .book-genre,
+        .book-author,
+        .book-publisher {
             font-size: 18px;
             color: #6c757d;
             margin-bottom: 20px;
@@ -95,9 +97,12 @@ if ($conn->connect_error) {
 
 if (isset($_GET['masach'])) {
     $masach = $_GET['masach'];
-    $sql = "SELECT sach.masach, sach.tensach, sach.giasach, sach.anhbia, sach.mota, sach.soluongton, chude.tenchude
+    $sql = "SELECT sach.masach, sach.tensach, sach.giasach, sach.anhbia, sach.mota, sach.soluongton, 
+                chude.tenchude, tacgia.tentacgia, nhaxuatban.tennhaxuatban
             FROM sach 
             JOIN chude ON sach.machude = chude.machude
+            JOIN tacgia ON sach.matacgia = tacgia.matacgia
+            JOIN nhaxuatban ON sach.manhaxuatban = nhaxuatban.manhaxuatban
             WHERE sach.masach = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $masach);
@@ -114,7 +119,7 @@ if (isset($_GET['masach'])) {
     exit();
 }
 
-// Xử lý thêm vào giỏ hàng
+// xử lý thêm vào giỏ hàng
 session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $soluong = (int)$_POST['quantity'];
@@ -144,6 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-md-7">
                 <h1 class="book-title"><?= $book['tensach'] ?></h1>
                 <p class="book-genre"><strong>Chủ đề:</strong> <?= $book['tenchude'] ?></p>
+                <p class="book-author"><strong>Tác giả:</strong> <?= $book['tentacgia'] ?></p>
+                <p class="book-publisher"><strong>Nhà xuất bản:</strong> <?= $book['tennhaxuatban'] ?></p>
                 <p class="book-price"><?= number_format($book['giasach'], 0, ',', '.') ?>đ</p>
                 <p class="book-description"><?= $book['mota'] ?></p>
 

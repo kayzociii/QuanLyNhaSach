@@ -476,14 +476,13 @@ $is_hidden = isset($_GET['search']) || isset($_GET['machude']);
                             </a>
                             <div class="book-details">
                                 <h5 class="book-title"><?= $row['tensach'] ?></h5>
-                                <p class="book-genre"><?= $row['tenchude'] ?></p>
                                 <p class="book-price"><?= number_format($row['giasach'], 0, ',', '.') ?>đ</p>
                             </div>
                         </div>
                         <?php
                     }
                 } else {
-                    echo "<p>Không có sách nào được tìm thấy.</p>";
+                    echo "<p style='text-align: center;'>Không có sách nào được tìm thấy.</p>";
                 }
                 ?>
             </div>
